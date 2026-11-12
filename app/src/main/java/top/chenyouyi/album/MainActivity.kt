@@ -194,7 +194,13 @@ class MainActivity : ComponentActivity() {
                 error: WebResourceError,
             ) {
                 // 子资源失败（某张图裂了）不该把整页换成离线页
-                if (request.isForMainFrame && !offline) showOffline()
+                if (request.isForMainFrame && !offline) {
+                    // 把真实错误码与 URL 带到离线页上：用户截图一张就能定位是
+                    // 域名解析、超时还是证书问题，不必远程猜。
+                    // Carry the real error code and URL onto the offline page so a
+                    // single screenshot identifies DNS / timeout / TLS issues.
+                    showOffline("${error.errorCode} ${error.description} · ${request.url}")
+                }
             }
 
             override fun onReceivedHttpError(
@@ -207,7 +213,7 @@ class MainActivity : ComponentActivity() {
                     errorResponse.statusCode >= 500 &&
                     !offline
                 ) {
-                    showOffline()
+                    showOffline("HTTP ${errorResponse.statusCode} · ${request.url}")
                 }
             }
         }
@@ -246,10 +252,15 @@ class MainActivity : ComponentActivity() {
         webView.loadUrl("$siteUrl/")
     }
 
-    private fun showOffline() {
+    private fun showOffline(reason: String = "") {
         offline = true
         applyKeepScreenOn(false)
-        webView.loadUrl(OFFLINE_PAGE)
+        // file:// 页面同样能读到 location.search；把原生侧的诊断信息传过去，
+        // 离线页本身仍然一个网络请求都不发。
+        // A file:// page can still read location.search, so diagnostics travel as
+        // a query param while the offline page itself stays network-free.
+        val query = if (reason.isBlank()) "" else "?why=" + Uri.encode(reason)
+        webView.loadUrl(OFFLINE_PAGE + query)
     }
 
     /**

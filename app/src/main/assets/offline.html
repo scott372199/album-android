@@ -82,14 +82,40 @@
   }
   button:active { background: #f2f2f4; }
   button[hidden] { display: none; }
+  /* 诊断信息：默认不占位，只有原生侧带 ?why= 过来才出现 */
+  .why {
+    margin: 0;
+    max-width: 22em;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    word-break: break-all;
+    text-align: left;
+  }
+  .why[hidden] { display: none; }
 </style>
 </head>
 <body>
   <div class="mark" aria-hidden="true"><span></span></div>
   <h1>网络不可用</h1>
   <p>照片在你的服务器上，需要联网才能打开。检查一下网络或稍后再试。</p>
+  <p class="why" id="why" hidden></p>
   <button id="retry" type="button">重新加载</button>
 
+  <script>
+    // 原生把失败原因放在 ?why= 里（错误码 + 描述 + URL）。没有就不显示。
+    // The native side appends ?why= with the error code, description and URL.
+    var why = document.getElementById('why');
+    var reason = new URLSearchParams(location.search).get('why');
+    if (reason) {
+      why.textContent = reason;
+      why.hidden = false;
+    }
+  </script>
   <script>
     // 原生桥只在 App 里存在；用纯 HTML 打开时按钮没有意义，直接隐藏。
     var bridge = window.AlbumNative;

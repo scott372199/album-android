@@ -1,0 +1,27 @@
+# ── Gradle 与构建产物 / Gradle and build output ────────────────
+.gradle/
+build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 本机 SDK 路径：因机器而异，永远不入库
+# Local SDK path: machine-specific, never committed
+local.properties
+
+# ── 签名材料 / Signing material ───────────────────────────────
+# 私钥一旦进 git 就等于公开：历史无法真正删除，clone 过的人都留了副本。
+# A private key in git is a public key: history cannot really be erased.
+*.keystore
+*.jks
+keystore.properties
+
+# ── 本地发布中间产物 / Local publish artifacts ─────────────────
+apk-out/
+
+# ── IDE / OS ─────────────────────────────────────────────────
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
